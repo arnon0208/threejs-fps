@@ -1,0 +1,291 @@
+/* Ember Yard page chrome. Same palette as game/src/palette.js: dusk yard,
+   rust and amber accents, teal for the defenders' visors and health. */
+:root {
+  --canvas: #171310;
+  --surface: #241d17;
+  --hairline: #3b3128;
+  --ink: #f0e8d8;
+  --muted: #a89a86;
+  --accent: #e8862e;
+  --ember: #c94f2a;
+  --teal: #3fa08f;
+  --danger: #ff5a3c;
+  --font-ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-readout: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+#game, #game canvas { position: fixed; inset: 0; display: block; }
+#hud { position: fixed; inset: 0; pointer-events: none; }
+
+/* Crosshair: four ticks whose gap follows the weapon spread. */
+#crosshair {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  --gap: 6px;
+}
+#crosshair i { position: absolute; background: var(--ink); opacity: 0.9; }
+#crosshair i:nth-child(1) { left: -1px; top: calc(-1 * var(--gap) - 7px); width: 2px; height: 7px; }
+#crosshair i:nth-child(2) { left: -1px; top: var(--gap); width: 2px; height: 7px; }
+#crosshair i:nth-child(3) { top: -1px; left: calc(-1 * var(--gap) - 7px); height: 2px; width: 7px; }
+#crosshair i:nth-child(4) { top: -1px; left: var(--gap); height: 2px; width: 7px; }
+
+#hitmarker {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  opacity: 0;
+  --hm-color: var(--accent);
+}
+#hitmarker.on { opacity: 1; }
+#hitmarker i { position: absolute; background: var(--hm-color); }
+#hitmarker i:nth-child(1) { left: 12px; top: 0; width: 2px; height: 8px; }
+#hitmarker i:nth-child(2) { left: 12px; bottom: 0; width: 2px; height: 8px; }
+#hitmarker i:nth-child(3) { top: 12px; left: 0; height: 2px; width: 8px; }
+#hitmarker i:nth-child(4) { top: 12px; right: 0; height: 2px; width: 8px; }
+
+#vignette {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(201, 79, 42, 0.55) 100%);
+}
+#flash {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  background: #fff;
+}
+
+#health {
+  position: fixed;
+  left: 32px;
+  bottom: 24px;
+  font-family: var(--font-readout);
+}
+#health-num { font-size: 48px; line-height: 1; }
+#health-bar {
+  width: 180px;
+  height: 6px;
+  margin-top: 6px;
+  background: var(--hairline);
+  border-radius: 3px;
+  overflow: hidden;
+}
+#health-bar i { display: block; height: 100%; width: 100%; background: var(--teal); }
+#armor-num { display: block; margin-top: 4px; font-size: 13px; color: var(--teal); }
+
+#ammo {
+  position: fixed;
+  right: 32px;
+  bottom: 24px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-readout);
+}
+#ammo-mag { font-size: 56px; line-height: 1; letter-spacing: -0.03em; }
+#ammo.empty #ammo-mag { color: var(--danger); }
+#ammo-reserve { font-size: 16px; color: var(--muted); }
+#weapon-name { font-size: 14px; color: var(--muted); margin-left: 6px; }
+
+#topbar {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  font-family: var(--font-readout);
+  font-size: 18px;
+}
+#score-us { color: var(--accent); font-size: 26px; }
+#score-them { color: var(--ember); font-size: 26px; }
+#timer { font-size: 22px; }
+#round-label { font-size: 12px; color: var(--muted); letter-spacing: 0.12em; }
+
+#money {
+  position: fixed;
+  top: 18px;
+  right: 32px;
+  font-family: var(--font-readout);
+  font-size: 18px;
+  color: var(--accent);
+}
+
+#killfeed {
+  position: fixed;
+  top: 64px;
+  right: 32px;
+  display: grid;
+  gap: 4px;
+  text-align: right;
+  font-family: var(--font-readout);
+  font-size: 13px;
+  color: var(--muted);
+}
+.kf-weapon { color: var(--ink); }
+.kf-head { color: var(--danger); }
+
+#announce {
+  position: fixed;
+  top: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  transition: opacity 300ms;
+}
+
+#plant {
+  position: fixed;
+  left: 50%;
+  bottom: 18%;
+  transform: translateX(-50%);
+  width: 260px;
+  display: none;
+  text-align: center;
+}
+#plant-fill {
+  height: 6px;
+  background: var(--accent);
+  border-radius: 3px;
+  width: 0;
+}
+#plant-label { display: block; margin-top: 6px; font-size: 13px; color: var(--ink); }
+
+#bomb-status {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  font-family: var(--font-readout);
+  font-size: 16px;
+  color: var(--danger);
+  letter-spacing: 0.08em;
+}
+
+#banner {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+#banner[hidden] { display: none; }
+#banner h1 {
+  margin: 0;
+  font-size: 56px;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9);
+}
+#banner p {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 18px;
+  color: var(--muted);
+}
+
+#buy {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  background: rgba(23, 19, 16, 0.82);
+  pointer-events: auto;
+}
+#buy[hidden] { display: none; }
+#buy h2 { margin: 0 0 4px; font-size: 26px; }
+#buy p { margin: 0 0 16px; color: var(--muted); }
+#shop {
+  display: grid;
+  grid-template-columns: repeat(3, 220px);
+  gap: 10px;
+}
+.shop-item {
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.shop-item:hover { border-color: var(--accent); }
+.shop-item.poor { opacity: 0.45; }
+.shop-item b { font-size: 15px; }
+.shop-item span { font-family: var(--font-readout); color: var(--accent); }
+.shop-item i { font-style: normal; font-size: 12px; color: var(--muted); }
+#buy-message { margin-top: 12px; color: var(--accent); min-height: 1em; }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(23, 19, 16, 0.72);
+  pointer-events: auto;
+}
+.panel {
+  width: min(460px, 100%);
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+}
+.panel h1 { margin: 0 0 8px; font-size: 34px; line-height: 1.1; font-weight: 600; }
+.panel p { margin: 0 0 24px; font-size: 15px; line-height: 1.5; color: var(--muted); }
+#play {
+  font: inherit;
+  font-weight: 600;
+  padding: 12px 18px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--canvas);
+  cursor: pointer;
+}
+#play:hover { background: var(--ink); border-color: var(--ink); }
+.keys {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.keys li { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.keys kbd {
+  min-width: 24px;
+  padding: 2px 6px;
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  font-family: var(--font-readout);
+  font-size: 12px;
+  color: var(--ink);
+  text-align: center;
+}
